@@ -48,9 +48,13 @@ class HashTable:
         Store the value with the given key.
 
         Hash collisions should be handled with Linked List Chaining.
-
-        Fill this in.
         '''
+        index =  self._hash_mod(key)
+        if self.storage[index] is not None:
+            print(f'Warning: overwriting data at {index}')
+        
+        self.storage[index] = LinkedPair(key, value)
+        
         pass
 
 
@@ -61,9 +65,11 @@ class HashTable:
 
         Print a warning if the key is not found.
 
-        Fill this in.
         '''
-        pass
+        index = self._hash_mod(key)
+        if self.storage[index] is None:
+            print(f'Warning: Key not found')
+        self.storage[index] = None
 
 
     def retrieve(self, key):
@@ -71,20 +77,30 @@ class HashTable:
         Retrieve the value stored with the given key.
 
         Returns None if the key is not found.
-
-        Fill this in.
         '''
-        pass
+        index = self._hash_mod(key)
 
+        if self.storage[index] is not None:
+            if self.storage[index].key == key:
+                return self.storage[index].value
+            else:
+                print("Warning: Key match error")
 
     def resize(self):
         '''
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
-
-        Fill this in.
         '''
-        pass
+        self.capacity *= 2
+        new_storage = [None] * self.capacity
+
+        for bucket_item in self.storage:
+            if bucket_item is not None:
+                new_index = self._hash_mod(bucket_item)
+                new_storage[new_index] = LinkedPair(bucket_item.key, bucket_item.value)
+            
+        self.storage = new_storage
+        
 
 
 
