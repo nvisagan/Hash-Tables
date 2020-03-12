@@ -6,6 +6,7 @@ class LinkedPair:
         self.key = key
         self.value = value
         self.next = None
+ 
 
 class HashTable:
     '''
@@ -15,6 +16,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
+        self.size = 0
 
 
     def _hash(self, key):
@@ -49,13 +51,26 @@ class HashTable:
 
         Hash collisions should be handled with Linked List Chaining.
         '''
-        index =  self._hash_mod(key)
-        if self.storage[index] is not None:
-            print(f'Warning: overwriting data at {index}')
+        index = self._hash_mod(key)
+        node = self.storage[index]
+        #Make while loop to keep checking our LL
+        while node is not None and node.key !=key:
+            #if not, make a copy of current pointer
+            temp = node
+            # current pointer  will point to the current's next node
+            node = node.next
         
-        self.storage[index] = LinkedPair(key, value)
-        
-        pass
+        #also check if its empty 
+        if node is not None:
+            node.value = value
+        else:
+            new_node = LinkedPair(key, value)
+            new_node.next = self.storage[index]
+            self.storage[index] = new_node
+            #increase size by 1 
+            self.size +=1
+
+      
 
 
 
@@ -63,13 +78,28 @@ class HashTable:
         '''
         Remove the value stored with the given key.
 
-        Print a warning if the key is not found.
+        Print a Warning if the key is not found.
 
         '''
         index = self._hash_mod(key)
-        if self.storage[index] is None:
-            print(f'Warning: Key not found')
-        self.storage[index] = None
+        node = self.storage[index]
+        #first check if the current place is not empty
+        temp = None
+        while node.key !=key:
+            temp = node
+            node = temp.next
+        if node is None:
+            return None
+        else:
+            if temp is None:
+                result = node.value
+                self.storage[index] = node.next
+                return result
+            else:
+                self.size -=1
+                temp.next = node.next
+                return node.value
+
 
 
     def retrieve(self, key):
@@ -79,27 +109,31 @@ class HashTable:
         Returns None if the key is not found.
         '''
         index = self._hash_mod(key)
+        node = self.storage[index]
+        while node is not None:
+            if node.key == key:
+                return node.value
+            node = node.next
+        return None
 
-        if self.storage[index] is not None:
-            if self.storage[index].key == key:
-                return self.storage[index].value
-            else:
-                print("Warning: Key match error")
 
     def resize(self):
         '''
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
         '''
+        old_storage = self.storage[:]
         self.capacity *= 2
-        new_storage = [None] * self.capacity
+        self.storage = [None] * self.capacity
 
-        for bucket_item in self.storage:
+        for bucket_item in old_storage:
             if bucket_item is not None:
-                new_index = self._hash_mod(bucket_item)
-                new_storage[new_index] = LinkedPair(bucket_item.key, bucket_item.value)
-            
-        self.storage = new_storage
+                node = bucket_item
+                while node:
+                    self.insert(node.key, node.value)
+                    node = node.next
+
+
         
 
 
